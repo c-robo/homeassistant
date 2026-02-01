@@ -16,7 +16,7 @@ variables:
 #    - light.table_lamp
      - !input lights_target_input
 #  mqtt_topic: zigbee2mqtt/0xffff000fe7fc8e0b
-mqtt_topic: !input mqtt_target_input
+  mqtt_topic: !input mqtt_target_input
   # -----------------------------------
 
   # Payload helpers (no need to edit)
@@ -104,6 +104,7 @@ action:
                   transition: "{{ t | float(0) }}"
 
         default: []
+
 
 
 
