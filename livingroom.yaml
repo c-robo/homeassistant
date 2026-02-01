@@ -1,0 +1,95 @@
+alias: Living Room Lights Dimmer Automation
+description: Control lights from Lutron Aurora via Zigbee2MQTT (click-to-toggle + dimmer rules)
+mode: restart
+
+variables:
+  # ---- EDIT THESE FOR YOUR SETUP ----
+  lights_target:
+    - light.table_lamp
+  mqtt_topic: zigbee2mqtt/0xffff000fe7fc8e0b
+  # -----------------------------------
+
+  # Payload helpers (no need to edit)
+  lvl: >-
+    {% if trigger and trigger.payload_json.action_level is defined %}
+      {{ trigger.payload_json.action_level }}
+    {% elif trigger and trigger.payload_json.brightness is defined %}
+      {{ trigger.payload_json.brightness }}
+    {% else %}
+      {{ none }}
+    {% endif %}
+  t: "{{ trigger.payload_json.action_transition_time | default(0) if trigger else 0 }}"
+  act: "{{ trigger.payload_json.action | default('') if trigger else '' }}"
+  is_click: >-
+    {{ act == 'brightness_move_to_level' and (t | float(0) >= 0.06) }}
+
+trigger:
+  - platform: mqtt
+    # NOTE: templates aren't supported here; keep this literal.
+    topic: zigbee2mqtt/0xffff000fe7fc8e0b
+
+condition:
+  - condition: template
+    value_template: "{{ trigger.payload_json.action == 'brightness_move_to_level' }}"
+
+action:
+  - choose:
+      # A) CLICK toggle behavior
+      - conditions:
+          - condition: template
+            value_template: "{{ is_click and expand(lights_target) | selectattr('state','eq','on') | list | count > 0 }}"
+        sequence:
+          - service: light.turn_off
+            target:
+              entity_id: "{{ lights_target }}"
+            data:
+              transition: "{{ t | float(0) }}"
+
+      - conditions:
+          - condition: template
+            value_template: "{{ is_click and expand(lights_target) | selectattr('state','eq','on') | list | count == 0 }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: "{{ lights_target }}"
+            data:
+              transition: "{{ t | float(0) }}"
+
+      # B) DIMMER: all targets OFF → turn ON (no brightness)
+      - conditions:
+          - condition: template
+            value_template: >
+              {{ not is_click and expand(lights_target) | selectattr('state','eq','on') | list | count == 0 }}
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: "{{ lights_target }}"
+            data:
+              transition: "{{ t | float(0) }}"
+
+      # C) DIMMER: some ON and level == 0 → turn OFF
+      - conditions:
+          - condition: template
+            value_template: >
+              {{ not is_click and (lvl | int(0) == 0) and expand(lights_target) | selectattr('state','eq','on') | list | count > 0 }}
+        sequence:
+          - service: light.turn_off
+            target:
+              entity_id: "{{ lights_target }}"
+            data:
+              transition: "{{ t | float(0) }}"
+
+    # D) DIMMER: otherwise set the provided brightness
+    default:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ not is_click and (lvl is not none) }}"
+            sequence:
+              - service: light.turn_on
+                target:
+                  entity_id: "{{ lights_target }}"
+                data:
+                  brightness: "{{ lvl | int }}"
+                  transition: "{{ t | float(0) }}"
+        default: []
