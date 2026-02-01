@@ -3,9 +3,9 @@ blueprint:
   description: Control lights from Lutron Aurora via Zigbee2MQTT (click-to-toggle + dimmer rules)
   domain: automation
   input:
-    mqtt_target_input
+    mqtt_target_input:
       name: MQTT_Device
-    lights_target_input
+    lights_target_input:
       name: Lights
 
 mode: restart
@@ -102,6 +102,7 @@ action:
                   transition: "{{ t | float(0) }}"
 
         default: []
+
 
 
 
