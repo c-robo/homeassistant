@@ -4,7 +4,7 @@ blueprint:
   domain: automation
   input:
     mqtt_target_input
-      name: MQTT Device
+      name: MQTT_Device
     lights_target_input
       name: Lights
 
@@ -102,6 +102,7 @@ action:
                   transition: "{{ t | float(0) }}"
 
         default: []
+
 
 
 
