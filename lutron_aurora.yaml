@@ -13,9 +13,7 @@ mode: restart
 variables:
   # ---- EDIT THESE FOR YOUR SETUP ----
   lights_target:
-#    - light.table_lamp
-     - !input lights_target_input
-#  mqtt_topic: zigbee2mqtt/0xffff000fe7fc8e0b
+    - !input lights_target_input
   mqtt_topic: !input mqtt_target_input
   # -----------------------------------
 
@@ -104,6 +102,7 @@ action:
                   transition: "{{ t | float(0) }}"
 
         default: []
+
 
 
 
