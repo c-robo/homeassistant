@@ -34,7 +34,7 @@ variables:
 trigger:
   - platform: mqtt
     # NOTE: templates aren't supported here; keep this literal.
-    topic: zigbee2mqtt/0xffff000fe7fc8e0b
+    topic: !input mqtt_target_input
 
 condition:
   - condition: template
@@ -102,10 +102,3 @@ action:
                   transition: "{{ t | float(0) }}"
 
         default: []
-
-
-
-
-
-
-
