@@ -1,5 +1,9 @@
-alias: Living Room Lights Dimmer Automation
-description: Control lights from Lutron Aurora via Zigbee2MQTT (click-to-toggle + dimmer rules)
+blueprint:
+  name: Lutron Aurora
+  alias: Living Room Lights Dimmer Automation
+  description: Control lights from Lutron Aurora via Zigbee2MQTT (click-to-toggle + dimmer rules)
+  domain: automation
+
 mode: restart
 
 variables:
@@ -92,4 +96,5 @@ action:
                 data:
                   brightness: "{{ lvl | int }}"
                   transition: "{{ t | float(0) }}"
+
         default: []
